@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>tablist</title>
+    <style>
+      #root > div {
+        display: flex;
+      }
+      #root > div > div {
+        height: 10px;
+        width: 10px;
+        background-color: #333;
+      }
+      #score {
+        font-size: 20px;
+        font-weight: bold;
+        font-family: Arial;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">Press enter to start</div>
+    <div id="score"></div>
+    <script>
+      const root = document.getElementById('root');
+      const color = (i, j, c) => root.children[i].children[j].style.backgroundColor = c;
+      const isInSnake = (x, y) => s.locs.some(l => l[0] === x && l[1] === y);
+      const newS = () => ({ locs: [[n / 2, n / 2]], food: null, tdir: 0, dir:0 , timeout: 0 });
+      let n = 20, s;
+      document.onkeydown = ({ keyCode: k }) => {
+        if (k === 13) {
+          root.innerHTML = Array(n).fill('<div>' + Array(n).fill('<div></div>').join('') + '</div>').join('');
+          if (s) clearTimeout(s.timeout);
+          s = newS();
+          gameLoop();
+        }
+        if (k > 36 && k < 41 && s.dir % 2 == k % 2) s.tdir = k - 37;
+      };
+      const gameLoop = () => {
+        document.getElementById('score').textContent = s.locs.length - 1;
+        s.dir = s.tdir;
+        while (!s.food || isInSnake(...s.food)) s.food = [0,0].map(() => Math.floor(Math.random() * n)); 
+        color(...s.food, '#eee');
+        const [x, y] = s.locs[0].map((n, i) => s.dir % 2 !== i ? n + s.dir + i - 2 : n);
+        if ([x, y].every((n, i) => n === s.food[i])) s.food = null;
+        else if (Math.min(x, y) < 0 || Math.max(x, y) >= n || isInSnake(x, y)) return;
+        else color(...s.locs.pop(), '#333');
+        s.locs.unshift([x, y]);
+        color(x, y, '#5a7');
+        s.timeout = setTimeout(gameLoop, 250)
+      };
+    </script>
+  </body>
+</html>
